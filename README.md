@@ -1,2 +1,2 @@
-# now_playing
+# Now Playing
 Now Playing widget for OBS
