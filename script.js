@@ -69,7 +69,8 @@
         transfer_interval = setInterval(()=>{
             let hostname = window.location.hostname;
             // TODO: maybe add more?
-            if (hostname === 'soundcloud.com' && !document.hidden) {
+            if (hostname === 'soundcloud.com') {
+
                 let status = query('.playControl', e => e.classList.contains('playing') ? "playing" : "stopped", 'unknown');
                 let cover = query('.playbackSoundBadge span.sc-artwork', e => e.style.backgroundImage.slice(5, -2).replace('t50x50','t500x500'));
                 let title = query('.playbackSoundBadge__titleLink', e => e.title);
@@ -92,7 +93,8 @@
                     conn.send(JSON.stringify({cover, title, artists, status, progress, duration, album_url, album}));
                 }
 
-            } else if (hostname === 'open.spotify.com' && !document.hidden) {
+            } else if (hostname === 'open.spotify.com') {
+
                 let data = navigator.mediaSession;
                 let album = data.metadata.album;
                 let status = query('.vnCew8qzJq3cVGlYFXRI', e => e === null ? 'stopped' : (e.getAttribute('aria-label') === 'Play' || e.getAttribute('aria-label') === 'Слушать' ? 'stopped' : 'playing'));
@@ -106,7 +108,7 @@
                 if (title !== null && (status == "playing" || status == "playing")) {
                     conn.send(JSON.stringify({ cover, title, artists, status, progress, duration, album }));
                 }
-            } else if (hostname === 'www.youtube.com' && !document.hidden) {
+            } else if (hostname === 'www.youtube.com') {
                 if (!navigator.mediaSession.metadata) // if nothing is playing we don't submit anything, otherwise having two youtube tabs open causes issues
                     return;
                 let artists = [];
@@ -145,7 +147,7 @@
                         conn.send(JSON.stringify({ cover, title, artists, status, progress: Math.floor(progress), duration }));
                     }
                 }
-            } else if (hostname === 'music.youtube.com' && !document.hidden) {
+            } else if (hostname === 'music.youtube.com') {
                 if (!navigator.mediaSession.metadata) // if nothing is playing we don't submit anything, otherwise having two youtube tabs open causes issues
                     return;
                 // Youtube Music support by Rubecks
