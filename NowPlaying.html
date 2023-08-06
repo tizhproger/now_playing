@@ -130,20 +130,17 @@
         </div>
     </div>
 </body>
-<script src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js"></script>
 <script>
     const PAUSED_PLACEHOLDER = "Nothing playing";
-    const REFRESH_INTERVAL_MS = 200;
-    const FETCH_URL = 'http://localhost:1608/';
+    const FETCH_URL = 'ws://localhost:8000/';
 
     const placeholder = "https://i.ibb.co/z41bX3P/placeholder.png";
     
     var last_cover = '';
     var last_artist = '';
     var last_title = '';
-    var peer = null;
     var conn = null;
-    var recvId = 'obssource';
+    var join_interval = null;
 
     function format_ms(s) {
         if (!s)
@@ -251,52 +248,28 @@
         });
     }
 
-    function initialize() {
-        peer = new Peer('obssource');
+    function join() {
+        conn = new WebSocket(FETCH_URL);
 
-        peer.on('open', function (id) {
-            console.log('ID: ' + peer.id);
+        conn.addEventListener('open', function (event) {
+            console.log('Connection Established')
+            conn.send('obs-source');
+            if(join_interval){
+                clearTimeout(join_interval);
+                join_interval = null;
+            };
         });
 
-        peer.on('connection', function (c) {
-            // Allow only a single connection
-            if (conn && conn.open) {
-                c.on('open', function() {
-                    c.send("Already connected to another client");
-                    setTimeout(function() { c.close(); }, 500);
-                });
-                return;
-            }
-
-            conn = c;
-            console.log("Connected to: " + conn.peer);
-            ready();
+        conn.addEventListener('message', function (event) {
+            fetch_data(JSON.parse(event.data))
         });
 
-        peer.on('disconnected', function () {
-            console.log('Connection lost. Please reconnect');
-            peer.reconnect();
-        });
-
-        peer.on('close', function() {
-            conn = null;
-            console.log('Connection destroyed');
-        });
-
-        peer.on('error', function (err) {
-            console.log(err);
+        conn.addEventListener('close', function () {
+            console.log("Connection closed, retrying...");
+            clearTimeout(join_interval);
+            join_interval = setTimeout(function(){join()}, 4000);
         });
     };
-
-    function ready() {
-        conn.on('data', function (data) {
-            fetch_data(JSON.parse(data))
-        });
-
-        conn.on('close', function () {
-            conn = null;
-        });
-    }
     
     function fetch_data(data) {
         // artist list
@@ -369,8 +342,8 @@
         last_title = data['title'];
     };
 
-    initialize();
-    //setInterval(fetch_data, REFRESH_INTERVAL_MS);
+    join();
+    
 </script>
 
 </html>
