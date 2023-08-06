@@ -15,69 +15,32 @@
 
 (function() {
 
-    var peer = null;
     var conn = null;
     var transfer_interval = null;
     var join_interval = null;
-    var recvIdInput = 'obssource';
 
-    function initialize() {
-                    // Create own peer object with connection to shared PeerJS server
-      var config = {"iceServers":[]};
-      peer = new Peer('browserext', config);
-      peer.on('open', function (id) {
-            console.log('ID: ' + peer.id);
-      });
-      peer.on('connection', function (c) {
-           // Disallow incoming connections
-            c.on('open', function() {
-            c.send("Sender does not accept incoming connections");
-            setTimeout(function() { c.close(); }, 500);
-               });
-       });
-      peer.on('disconnected', function () {
-           console.log('Connection lost. Please reconnect');
-           peer.reconnect();
-       });
-
-       peer.on('close', function() {
-            conn = null;
-            console.log('Connection destroyed');
-       });
-
-       peer.on('error', function (err) {
-            console.log(err);
-             });
-    };
 
 
     function join() {
-        if (conn) {
-            conn.close();
-        }
+        const conn = new WebSocket('ws://localhost:8000');
 
-        // Create connection to destination peer specified in the input field
-        conn = peer.connect(recvIdInput, {
-            reliable: true
+        conn.addEventListener('open', function (event) {
+            console.log('Connection Established')
         });
 
-        conn.on('open', function () {
-            console.log("Connected to: " + conn.peer);
+        conn.addEventListener('message', function (event) {
+            console.log(event.data);
         });
 
-        // Handle incoming data (messages only since this is the signal sender)
-        conn.on('data', function (data) {
-            console.log(data);
-        });
-
-        conn.on('close', function () {
+        conn.addEventListener('close', function () {
             console.log("Connection closed");
+            console.log(conn);
             clearInterval(transfer_interval);
             join_interval = setInterval(try_join, 2000);
         });
 
-        conn.on('error', function () {
-            console.log("Connection closed");
+        conn.addEventListener('error', function () {
+            console.log("Connection error");
         });
     };
 
@@ -109,9 +72,6 @@
         }
         return 0;
     };
-
-
-    initialize();
 
 
   function start_transfer(){
