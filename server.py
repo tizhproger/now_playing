@@ -12,15 +12,16 @@ obs_reciever = ''
 # The main behavior function for this server
 async def echo(websocket):
     global obs_reciever
-    print("A client just connected")
+    print("A browser client connected")
     # Store a copy of the connected client
-    connected.add(websocket)
+    if websocket not in connected:
+        connected.add(websocket)
     # Handle incoming messages
     try:
         async for message in websocket:
-            print("Received message from client: " + message)
             if message == 'obs-source':
                 obs_reciever = websocket
+                print("Source in OBS connected")
             else:
                 if obs_reciever != websocket and obs_reciever != '':
                     if obs_reciever.open:
