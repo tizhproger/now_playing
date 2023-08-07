@@ -1,0 +1,13 @@
+{
+    "name": "Now Playing - OBS",
+    "version": "1.0.0",
+    "description": "Http server for OBS now playing widget",
+    "manifest_version": 3,
+    "author": "Tizhproger inspired by Tuna",
+    "content_scripts": [
+        {
+        "matches": ["https://*/*"],
+        "js": ["nowplaying_server.js"]
+        }
+      ]
+}
