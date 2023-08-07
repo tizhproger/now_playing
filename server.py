@@ -7,7 +7,7 @@ print("Server listening on Port " + str(PORT))
 
 # A set of connected ws clients
 connected = set()
-obs_reciever = ''
+obs_reciever = set()
 
 # The main behavior function for this server
 async def echo(websocket):
@@ -20,12 +20,13 @@ async def echo(websocket):
     try:
         async for message in websocket:
             if message == 'obs-source':
-                obs_reciever = websocket
+                obs_reciever.add(websocket)
                 print("Source in OBS connected")
             else:
-                if obs_reciever != websocket and obs_reciever != '':
-                    if obs_reciever.open:
-                        await obs_reciever.send(message)
+                if len(obs_reciever) > 0:
+                    for obs in obs_reciever:
+                        if obs.open and obs != websocket:
+                            await obs.send(message)
 
     # Handle disconnecting clients 
     except websockets.exceptions.ConnectionClosed as e:
