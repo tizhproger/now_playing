@@ -180,11 +180,8 @@
         }, 500);
     }
 
-    function delay(time) {
-        return new Promise(resolve => setTimeout(resolve, time));
-    }
-
-
-    join();
+    if (hostname === 'soundcloud.com' || hostname === 'music.youtube.com' || hostname === 'www.youtube.com' || hostname === 'open.spotify.com'){
+        join();
+    };
 
 })();
