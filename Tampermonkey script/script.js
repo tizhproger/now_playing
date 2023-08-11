@@ -67,7 +67,7 @@
 
     function start_transfer(){
         transfer_interval = setInterval(()=>{
-            let hostname = window.location.hostname;
+            let hostname = document.location.hostname;
             // TODO: maybe add more?
             if (hostname === 'soundcloud.com') {
 
@@ -77,26 +77,14 @@
                 let artists = [ query('.playbackSoundBadge__lightLink', e => e.title) ];
                 let progress = query('.playbackTimeline__timePassed span:nth-child(2)', e => timestamp_to_ms(e.textContent));
                 let duration = query('.playbackTimeline__duration span:nth-child(2)', e => timestamp_to_ms(e.textContent));
-                let album_url = query('.playbackSoundBadge__titleLink', e => e.href);
-                let album = null;
-                // this header only exists on album/set pages so we know this is a full album
-                album = query('.fullListenHero .soundTitle__title', e => {
-                    album_url = window.location.href;
-                    return e.innerText
-                })
-
-                album = query('div.playlist.playing', e => {
-                    return e.getElementsByClassName('soundTitle__title')[0].innerText;
-                })
 
                 if (title !== null && status == "playing") {
-                    conn.send(JSON.stringify({cover, title, artists, status, progress, duration, album_url, album}));
+                    conn.send(JSON.stringify({cover, title, artists, status, progress, duration}));
                 }
 
             } else if (hostname === 'open.spotify.com') {
 
                 let data = navigator.mediaSession;
-                let album = data.metadata.album;
                 let status = query('.vnCew8qzJq3cVGlYFXRI', e => e === null ? 'stopped' : (e.getAttribute('aria-label') === 'Play' || e.getAttribute('aria-label') === 'Слушать' ? 'stopped' : 'playing'));
                 let cover = data.metadata.artwork[0].src;
                 let title = data.metadata.title
@@ -106,7 +94,7 @@
 
 
                 if (title !== null && (status == "playing" || status == "playing")) {
-                    conn.send(JSON.stringify({ cover, title, artists, status, progress, duration, album }));
+                    conn.send(JSON.stringify({ cover, title, artists, status, progress, duration }));
                 }
             } else if (hostname === 'www.youtube.com') {
                 if (!navigator.mediaSession.metadata) // if nothing is playing we don't submit anything, otherwise having two youtube tabs open causes issues
@@ -128,7 +116,7 @@
                 let cover = "";
                 let status = query('video', e => e.paused ? 'stopped' : 'playing', 'unknown');
                 let regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-                let match = window.location.toString().match(regExp);
+                let match = document.location.toString().match(regExp);
                 if (match && match[2].length == 11) {
                     cover = `https://i.ytimg.com/vi/${match[2]}/maxresdefault.jpg`;
                 }
@@ -166,15 +154,13 @@
 
                 let title = query('.ytmusic-player-bar.title', e => e.title);
                 let artists = Array.from(document.querySelectorAll(artistsSelectors)).map(x => x.innerText);
-                let album = query(albumSelectors, e => e.textContent);
                 let artwork = navigator.mediaSession.metadata.artwork;
                 let cover = artwork[artwork.length - 1].src;
-                let album_url = query(albumSelectors, e => e.href);
                 let progress = timestamp_to_ms(time[0]);
                 let duration = timestamp_to_ms(time[1]);
 
                 if (title !== null && status == 'playing') {
-                    conn.send(JSON.stringify({ cover, title, artists, status, progress, duration, album_url, album }));
+                    conn.send(JSON.stringify({ cover, title, artists, status, progress, duration }));
                 }
             }
         }, 500);
