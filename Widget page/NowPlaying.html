@@ -29,7 +29,7 @@
 
     #cover {
         height: 100%;
-        transition: opacity 0.36s ease-in-out;
+        transition: opacity 0.38s ease-in-out;
 		opacity: 1;
         aspect-ratio: 1;
         border-radius: 4px;
@@ -290,7 +290,7 @@
 
         if (data['cover'] == undefined ||
             data['cover'] == '') {
-            document.getElementById('cover').style.backgroundImage = `url(${placeholder}})`;
+            document.getElementById('cover').src = `url(${placeholder}})`;
         } else if (data['cover'] !== last_cover || // Refresh only if meta data suggests that the cover changed
             (data['title'] !== last_title ||    // When using MPD the path is always the cover path configured in tuna
                 artists !== last_artist))           // which means it won't change so we check against other data
@@ -303,7 +303,7 @@
 				img_cover.src = data['cover'];
 				// Apply the fade-in effect
 				img_cover.style.opacity = '1';
-			  }, 360);
+			  }, 380);
 			last_cover = data['cover'];
 
             extract_color_palette(data['cover'], 10).then(palette => {
