@@ -29,14 +29,13 @@
 
     #cover {
         height: 100%;
-        transition: background-image 0.8s ease-in-out;
+        transition: opacity 0.36s ease-in-out;
+		opacity: 1;
         aspect-ratio: 1;
-        background-size: cover;
         border-radius: 4px;
         box-shadow: 0 0 4px 4px rgba(0, 0, 0, .5) inset;
-        background-position: center;
-        background-repeat: no-repeat;
     }
+	
 
     .image-box {
 
@@ -44,6 +43,7 @@
         border-width: 1px;
         height: 100%;
         float: left;
+		overflow: hidden;
     }
 
     .image-box img {
@@ -111,7 +111,7 @@
 <body>
     <div class="widget">
         <div class="image-box">
-            <div id="cover"></div>
+            <img id="cover" src="https://i.ibb.co/z41bX3P/placeholder.png" alt="Image">
         </div>
         <div class="info">
             <p id="title">&nbsp;</p>
@@ -296,10 +296,15 @@
                 artists !== last_artist))           // which means it won't change so we check against other data
         {
             // Random number at the end is to prevent caching
-            setTimeout(() => {
-                document.getElementById('cover').style.backgroundImage = `url(${data['cover'] + '?' + new Date().getTime()})`;
-                last_cover = data['cover'];
-            }, 700);
+			
+			var img_cover = document.getElementById('cover');
+			img_cover.style.opacity = '0';
+			setTimeout(() => {
+				img_cover.src = data['cover'];
+				// Apply the fade-in effect
+				img_cover.style.opacity = '1';
+			  }, 360);
+			last_cover = data['cover'];
 
             extract_color_palette(data['cover'], 10).then(palette => {
                 var brightest_value = 0;
