@@ -114,7 +114,7 @@
                     title = title.replace("(Original Video)", "");
                     title = title.replace("(Original Mix)", "");
 
-                    if (status !== 'stopped') {
+                    if (status == 'playing' && !document.hidden) {
                         conn.send(JSON.stringify({ cover, title, artists, status, progress: Math.floor(progress), duration }));
                     }
                 }
