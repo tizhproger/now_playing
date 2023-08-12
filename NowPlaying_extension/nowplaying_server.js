@@ -1,6 +1,7 @@
     var conn = null;
     var transfer_interval = null;
     var join_interval = null;
+	var hostname = window.location.hostname;
     const FETCH_URL = 'ws://localhost:8000/';
 
 
@@ -50,7 +51,6 @@
 
     function start_transfer(){
         transfer_interval = setInterval(()=>{
-            let hostname = document.location.hostname;
             // TODO: maybe add more?
             if (hostname === 'soundcloud.com') {
 
