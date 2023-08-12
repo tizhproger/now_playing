@@ -18,6 +18,7 @@
     var conn = null;
     var transfer_interval = null;
     var join_interval = null;
+    let hostname = document.location.hostname;
     const FETCH_URL = 'ws://localhost:8000/';
 
 
@@ -67,7 +68,6 @@
 
     function start_transfer(){
         transfer_interval = setInterval(()=>{
-            let hostname = document.location.hostname;
             // TODO: maybe add more?
             if (hostname === 'soundcloud.com') {
 
@@ -131,7 +131,7 @@
                     title = title.replace("(Original Video)", "");
                     title = title.replace("(Original Mix)", "");
 
-                    if (status !== 'stopped') {
+                    if (status == 'playing' && !document.hidden) {
                         conn.send(JSON.stringify({ cover, title, artists, status, progress: Math.floor(progress), duration }));
                     }
                 }
