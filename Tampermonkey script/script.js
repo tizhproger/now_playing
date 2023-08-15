@@ -18,7 +18,7 @@
     var conn = null;
     var transfer_interval = null;
     var join_interval = null;
-    let hostname = document.location.hostname;
+    var hostname = window.location.hostname;
     const FETCH_URL = 'ws://localhost:8000/';
 
 
@@ -77,14 +77,26 @@
                 let artists = [ query('.playbackSoundBadge__lightLink', e => e.title) ];
                 let progress = query('.playbackTimeline__timePassed span:nth-child(2)', e => timestamp_to_ms(e.textContent));
                 let duration = query('.playbackTimeline__duration span:nth-child(2)', e => timestamp_to_ms(e.textContent));
+                let album_url = query('.playbackSoundBadge__titleLink', e => e.href);
+                let album = null;
+                // this header only exists on album/set pages so we know this is a full album
+                album = query('.fullListenHero .soundTitle__title', e => {
+                    album_url = window.location.href;
+                    return e.innerText
+                })
+
+                album = query('div.playlist.playing', e => {
+                    return e.getElementsByClassName('soundTitle__title')[0].innerText;
+                })
 
                 if (title !== null && status == "playing") {
-                    conn.send(JSON.stringify({cover, title, artists, status, progress, duration}));
+                    conn.send(JSON.stringify({cover, title, artists, status, progress, duration, album_url, album}));
                 }
 
             } else if (hostname === 'open.spotify.com') {
 
                 let data = navigator.mediaSession;
+                let album = data.metadata.album;
                 let status = query('.vnCew8qzJq3cVGlYFXRI', e => e === null ? 'stopped' : (e.getAttribute('aria-label') === 'Play' || e.getAttribute('aria-label') === 'Слушать' ? 'stopped' : 'playing'));
                 let cover = data.metadata.artwork[0].src;
                 let title = data.metadata.title
@@ -93,9 +105,10 @@
                 let duration = query('.npFSJSO1wsu3mEEGb5bh', e => timestamp_to_ms(e.textContent));
 
 
-                if (title !== null && (status == "playing" || status == "playing")) {
-                    conn.send(JSON.stringify({ cover, title, artists, status, progress, duration }));
+                if (title !== null && status == "playing") {
+                    conn.send(JSON.stringify({ cover, title, artists, status, progress, duration, album }));
                 }
+
             } else if (hostname === 'www.youtube.com') {
                 if (!navigator.mediaSession.metadata) // if nothing is playing we don't submit anything, otherwise having two youtube tabs open causes issues
                     return;
@@ -105,21 +118,11 @@
                     artists = [ document.querySelector('div#upload-info').querySelector('a').innerText.trim().replace("\n", "") ];
                 } catch(e) {}
 
-                let title = query('.style-scope.ytd-video-primary-info-renderer', e => {
-                    let t = e.getElementsByClassName('title');
-                    if (t && t.length > 0)
-                        return t[0].innerText;
-                    return "";
-                });
+                let title = navigator.mediaSession.metadata.title;
                 let duration = query('video', e => e.duration * 1000);
                 let progress = query('video', e => e.currentTime * 1000);
-                let cover = "";
-                let status = query('video', e => e.paused ? 'stopped' : 'playing', 'unknown');
-                let regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-                let match = document.location.toString().match(regExp);
-                if (match && match[2].length == 11) {
-                    cover = `https://i.ytimg.com/vi/${match[2]}/maxresdefault.jpg`;
-                }
+                let cover = navigator.mediaSession.metadata.artwork[0].src;
+                let status = navigator.mediaSession.playbackState;
 
 
                 if (title !== null) {
@@ -131,29 +134,20 @@
                     title = title.replace("(Original Video)", "");
                     title = title.replace("(Original Mix)", "");
 
-                    if (status == 'playing' && !document.hidden) {
+                    if (status == 'playing' && progress > 0) {
                         conn.send(JSON.stringify({ cover, title, artists, status, progress: Math.floor(progress), duration }));
                     }
                 }
             } else if (hostname === 'music.youtube.com') {
                 if (!navigator.mediaSession.metadata) // if nothing is playing we don't submit anything, otherwise having two youtube tabs open causes issues
                     return;
-                // Youtube Music support by Rubecks
-                const artistsSelectors = [
-                    '.ytmusic-player-bar.byline [href*="channel/"]:not([href*="channel/MPREb_"]):not([href*="browse/MPREb_"])', // Artists with links
-                    '.ytmusic-player-bar.byline .yt-formatted-string:nth-child(2n+1):not([href*="browse/"]):not([href*="channel/"]):not(:nth-last-child(1)):not(:nth-last-child(3))', // Artists without links
-                    '.ytmusic-player-bar.byline [href*="browse/FEmusic_library_privately_owned_artist_detaila_"]', // Self uploaded music
-                ];
-                const albumSelectors = [
-                    '.ytmusic-player-bar [href*="browse/MPREb_"]', // Albums from YTM with links
-                    '.ytmusic-player-bar [href*="browse/FEmusic_library_privately_owned_release_detailb_"]', // Self uploaded music
-                ];
+
                 let time = query('.ytmusic-player-bar.time-info', e => e.innerText.split(" / "));
 
                 let status = query('#play-pause-button', e => e === null ? 'stopped' : (e.getAttribute('aria-label') === 'Play' || e.getAttribute('aria-label') === 'Воспроизвести' ? 'stopped' : 'playing'));
 
-                let title = query('.ytmusic-player-bar.title', e => e.title);
-                let artists = Array.from(document.querySelectorAll(artistsSelectors)).map(x => x.innerText);
+                let title = document.getElementsByClassName("title style-scope ytmusic-player-bar")[0].innerHTML;
+                let artists = navigator.mediaSession.metadata.artist;
                 let artwork = navigator.mediaSession.metadata.artwork;
                 let cover = artwork[artwork.length - 1].src;
                 let progress = timestamp_to_ms(time[0]);
