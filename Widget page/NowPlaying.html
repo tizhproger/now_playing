@@ -272,14 +272,7 @@
     };
     
     function fetch_data(data) {
-        // artist list
-        var artists = '';
-        var array = data['artists'] || []; // in some cases no artist is known/submitted
-        for (var i = 0; i < array.length; i++) {
-            artists += array[i];
-            if (i < array.length - 1)
-                artists += ', ';
-        }
+        var artists = data['artists'] == [] ? '' : data['artists'];
 
         if (data['title'] != last_title) {
             if (!data['title'])
