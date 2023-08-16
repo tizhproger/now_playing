@@ -5,4 +5,3 @@ Now Playing widget for OBS
 
 [Virustotal check for server.exe](https://www.virustotal.com/gui/file/4184c30fa08374eb68b41618515d8b2cb62968b9e260d42780dff60aa2201c98/detection)
 
-![Dr.Web analysis result](https://img001.prntscr.com/file/img001/ZtLarrdqTT-7K3Uepj-6GA.png)
