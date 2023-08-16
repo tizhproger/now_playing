@@ -10,16 +10,13 @@
         conn = new WebSocket(FETCH_URL);
 
         conn.addEventListener('open', function (event) {
-            console.log('Connection Established')
+            console.log('Connection Established');
+            conn.send("connected - " + hostname);
             start_transfer();
             if(join_interval){
                 clearTimeout(join_interval);
                 join_interval = null;
             };
-        });
-
-        conn.addEventListener('message', function (event) {
-            console.log(event.data);
         });
 
         conn.addEventListener('close', function () {
@@ -140,3 +137,7 @@
     if (hostname === 'soundcloud.com' || hostname === 'music.youtube.com' || hostname === 'www.youtube.com' || hostname === 'open.spotify.com'){
         join();
     };
+
+    window.addEventListener('beforeunload', function (e) {
+        conn.send("closed - " + hostname);
+    });
