@@ -76,9 +76,10 @@
                 let duration = query('.npFSJSO1wsu3mEEGb5bh', e => timestamp_to_ms(e.textContent));
 
 
-                if (title !== null && (status == "playing" || status == "playing")) {
+                if (title !== null && status == "playing") {
                     conn.send(JSON.stringify({ cover, title, artists, status, progress, duration }));
                 }
+
             } else if (hostname === 'www.youtube.com') {
                 if (!navigator.mediaSession.metadata) // if nothing is playing we don't submit anything, otherwise having two youtube tabs open causes issues
                     return;
@@ -96,13 +97,8 @@
                 });
                 let duration = query('video', e => e.duration * 1000);
                 let progress = query('video', e => e.currentTime * 1000);
-                let cover = "";
-                let status = query('video', e => e.paused ? 'stopped' : 'playing', 'unknown');
-                let regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-                let match = document.location.toString().match(regExp);
-                if (match && match[2].length == 11) {
-                    cover = `https://i.ytimg.com/vi/${match[2]}/maxresdefault.jpg`;
-                }
+                let cover = navigator.mediaSession.metadata.artwork[0].src;
+                let status = navigator.mediaSession.playbackState;
 
 
                 if (title !== null) {
@@ -113,30 +109,22 @@
                     title = title.replace("(Official Music Video)", "");
                     title = title.replace("(Original Video)", "");
                     title = title.replace("(Original Mix)", "");
+                    title = title.replace(",", "");
 
-                    if (status == 'playing' && !document.hidden) {
+                    if (status == 'playing' && progress > 0) {
                         conn.send(JSON.stringify({ cover, title, artists, status, progress: Math.floor(progress), duration }));
                     }
                 }
             } else if (hostname === 'music.youtube.com') {
                 if (!navigator.mediaSession.metadata) // if nothing is playing we don't submit anything, otherwise having two youtube tabs open causes issues
                     return;
-                // Youtube Music support by Rubecks
-                const artistsSelectors = [
-                    '.ytmusic-player-bar.byline [href*="channel/"]:not([href*="channel/MPREb_"]):not([href*="browse/MPREb_"])', // Artists with links
-                    '.ytmusic-player-bar.byline .yt-formatted-string:nth-child(2n+1):not([href*="browse/"]):not([href*="channel/"]):not(:nth-last-child(1)):not(:nth-last-child(3))', // Artists without links
-                    '.ytmusic-player-bar.byline [href*="browse/FEmusic_library_privately_owned_artist_detaila_"]', // Self uploaded music
-                ];
-                const albumSelectors = [
-                    '.ytmusic-player-bar [href*="browse/MPREb_"]', // Albums from YTM with links
-                    '.ytmusic-player-bar [href*="browse/FEmusic_library_privately_owned_release_detailb_"]', // Self uploaded music
-                ];
+
                 let time = query('.ytmusic-player-bar.time-info', e => e.innerText.split(" / "));
 
                 let status = query('#play-pause-button', e => e === null ? 'stopped' : (e.getAttribute('aria-label') === 'Play' || e.getAttribute('aria-label') === 'Воспроизвести' ? 'stopped' : 'playing'));
 
-                let title = query('.ytmusic-player-bar.title', e => e.title);
-                let artists = Array.from(document.querySelectorAll(artistsSelectors)).map(x => x.innerText);
+                let title = document.getElementsByClassName("title style-scope ytmusic-player-bar")[0].innerHTML;
+                let artists = [navigator.mediaSession.metadata.artist];
                 let artwork = navigator.mediaSession.metadata.artwork;
                 let cover = artwork[artwork.length - 1].src;
                 let progress = timestamp_to_ms(time[0]);
