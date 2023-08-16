@@ -272,7 +272,14 @@
     };
     
     function fetch_data(data) {
-        var artists = data['artists'] == [] ? '' : data['artists'];
+        var artists = '';
+        var array = data['artists'] || []; // in some cases no artist is known/submitted
+        for (var i = 0; i < array.length; i++) {
+            artists += array[i];
+            if (i < array.length - 1)
+                artists += ', ';
+        }
+
 
         if (data['title'] != last_title) {
             if (!data['title'])
@@ -326,6 +333,7 @@
             // use &nbsp; in case we have neither artist nor album
             // space is considered empty element, &nbsp; is not
             artistLine == '' ? document.getElementById('artist').innerHTML = "&nbsp;" : document.getElementById('artist').innerHTML = artistLine
+			
         }
 
         var length = data['duration'];
