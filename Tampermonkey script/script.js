@@ -77,26 +77,14 @@
                 let artists = [ query('.playbackSoundBadge__lightLink', e => e.title) ];
                 let progress = query('.playbackTimeline__timePassed span:nth-child(2)', e => timestamp_to_ms(e.textContent));
                 let duration = query('.playbackTimeline__duration span:nth-child(2)', e => timestamp_to_ms(e.textContent));
-                let album_url = query('.playbackSoundBadge__titleLink', e => e.href);
-                let album = null;
-                // this header only exists on album/set pages so we know this is a full album
-                album = query('.fullListenHero .soundTitle__title', e => {
-                    album_url = window.location.href;
-                    return e.innerText
-                })
-
-                album = query('div.playlist.playing', e => {
-                    return e.getElementsByClassName('soundTitle__title')[0].innerText;
-                })
 
                 if (title !== null && status == "playing") {
-                    conn.send(JSON.stringify({cover, title, artists, status, progress, duration, album_url, album}));
+                    conn.send(JSON.stringify({cover, title, artists, status, progress, duration}));
                 }
 
             } else if (hostname === 'open.spotify.com') {
 
                 let data = navigator.mediaSession;
-                let album = data.metadata.album;
                 let status = query('.vnCew8qzJq3cVGlYFXRI', e => e === null ? 'stopped' : (e.getAttribute('aria-label') === 'Play' || e.getAttribute('aria-label') === 'Слушать' ? 'stopped' : 'playing'));
                 let cover = data.metadata.artwork[0].src;
                 let title = data.metadata.title
@@ -106,7 +94,7 @@
 
 
                 if (title !== null && status == "playing") {
-                    conn.send(JSON.stringify({ cover, title, artists, status, progress, duration, album }));
+                    conn.send(JSON.stringify({ cover, title, artists, status, progress, duration }));
                 }
 
             } else if (hostname === 'www.youtube.com') {
