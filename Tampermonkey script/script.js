@@ -118,7 +118,12 @@
                     artists = [ document.querySelector('div#upload-info').querySelector('a').innerText.trim().replace("\n", "") ];
                 } catch(e) {}
 
-                let title = navigator.mediaSession.metadata.title;
+                let title = query('.style-scope.ytd-video-primary-info-renderer', e => {
+                    let t = e.getElementsByClassName('title');
+                    if (t && t.length > 0)
+                        return t[0].innerText;
+                    return "";
+                });
                 let duration = query('video', e => e.duration * 1000);
                 let progress = query('video', e => e.currentTime * 1000);
                 let cover = navigator.mediaSession.metadata.artwork[0].src;
@@ -133,6 +138,7 @@
                     title = title.replace("(Official Music Video)", "");
                     title = title.replace("(Original Video)", "");
                     title = title.replace("(Original Mix)", "");
+                    title = title.replace(",", "");
 
                     if (status == 'playing' && progress > 0) {
                         conn.send(JSON.stringify({ cover, title, artists, status, progress: Math.floor(progress), duration }));
@@ -147,7 +153,7 @@
                 let status = query('#play-pause-button', e => e === null ? 'stopped' : (e.getAttribute('aria-label') === 'Play' || e.getAttribute('aria-label') === 'Воспроизвести' ? 'stopped' : 'playing'));
 
                 let title = document.getElementsByClassName("title style-scope ytmusic-player-bar")[0].innerHTML;
-                let artists = navigator.mediaSession.metadata.artist;
+                let artists = [navigator.mediaSession.metadata.artist];
                 let artwork = navigator.mediaSession.metadata.artwork;
                 let cover = artwork[artwork.length - 1].src;
                 let progress = timestamp_to_ms(time[0]);
