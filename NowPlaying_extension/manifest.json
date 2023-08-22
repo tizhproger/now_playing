@@ -1,12 +1,12 @@
 {
     "name": "Now Playing - OBS",
-    "version": "0.0.0.2",
+    "version": "1.2.0",
     "description": "Client for OBS now playing widget",
     "manifest_version": 3,
     "author": "Tizhproger inspired by Tuna",
     "content_scripts": [
         {
-        "matches": ["https://*/*"],
+        "matches": ["https://*.youtube.com/*", "https://*.spotify.com/*", "https://*.soundcloud.com/*"],
         "js": ["nowplaying_client.js"]
         }
       ],
