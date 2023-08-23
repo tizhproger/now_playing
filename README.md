@@ -1,5 +1,4 @@
-# Now Playing
-Now Playing widget for OBS
+# Now Playing widget for OBS
 
 > Currently working with Chrome and Firefox.
 
