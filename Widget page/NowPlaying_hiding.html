@@ -273,7 +273,7 @@
 
         conn.addEventListener('message', function (event) {
             fetch_data(JSON.parse(event.data));
-            last_message_time = new Date().getTime() + 500;
+            last_message_time = new Date().getTime() + 1000;
         });
 
         conn.addEventListener('close', function () {
