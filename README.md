@@ -1,6 +1,8 @@
 # Now Playing widget for OBS
 
-> Currently working with Chrome and Firefox.
+> Currently working with Chrome, Firefox and Opera.
+
+> Also important to note, that server part designed to work only on windows. Other OS like MacOS or Linux will be added later. If you can write the server part for listed OS, feel free to contribute!
 
 This repository was based on [Tuna project](https://obsproject.com/forum/resources/tuna.843/) and is a modification of it.
 
