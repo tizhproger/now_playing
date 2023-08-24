@@ -348,6 +348,10 @@
         last_title = data['title'];
     };
 
+    window.addEventListener('beforeunload', function (e) {
+        conn.send("closed - OBS source");
+    });
+
     join();
     
 </script>
