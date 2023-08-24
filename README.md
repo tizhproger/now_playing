@@ -8,7 +8,7 @@ Web extension for:
 
 Chrome - [Webstore](https://chrome.google.com/webstore/detail/now-playing-obs/ggkicimibhpmfkoepnlbbdomnkfkmcie)
 
-Firefox - 
+Firefox - [Mozilla add-ons](https://addons.mozilla.org/ru/firefox/addon/now-playing-obs/)
 
 
 **Usage example** - [YouTube](https://www.youtube.com/watch?v=1kKZyg3AEGY)
