@@ -17,7 +17,8 @@ Opera - Opera addons
 
 **Usage example** - [YouTube](https://www.youtube.com/watch?v=1kKZyg3AEGY)
 
-**Installation tutorial** - [Telegraph](https://telegra.ph/Installtion-guide-for-Now-Playing---OBS-widget-08-24)
+**Installation tutorial (EN)** - [Telegraph](https://telegra.ph/Installtion-guide-for-Now-Playing---OBS-widget-08-24)
+**Installation tutorial (RU)** - [Telegraph](https://telegra.ph/Rukovodstvo-po-ustanovke-vidzheta-Now-Playing---OBS-08-24)
 
 
 
