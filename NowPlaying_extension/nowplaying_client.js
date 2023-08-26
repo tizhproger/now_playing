@@ -3,6 +3,8 @@
     var join_interval = null;
     var hostname = window.location.hostname;
     const FETCH_URL = 'ws://localhost:8000/';
+	var count = 0
+	var join_retry_time = 4000
 
 
 
@@ -11,6 +13,7 @@
 
         conn.addEventListener('open', function (event) {
             console.log('Connection Established');
+			count = 0;
             conn.send("connected - " + hostname);
             start_transfer();
             if(join_interval){
@@ -21,9 +24,13 @@
 
         conn.addEventListener('close', function () {
             console.log("Connection closed, retrying...");
+			count += 1;
             clearTimeout(join_interval);
             clearInterval(transfer_interval);
-            join_interval = setTimeout(function(){join()}, 4000);
+			if(count % 20 === 0){
+				join_retry_time *= 2;
+			}
+            join_interval = setTimeout(function(){join()}, join_retry_time);
         });
     };
 
@@ -57,9 +64,10 @@
                 let artists = [ query('.playbackSoundBadge__lightLink', e => e.title) ];
                 let progress = query('.playbackTimeline__timePassed span:nth-child(2)', e => timestamp_to_ms(e.textContent));
                 let duration = query('.playbackTimeline__duration span:nth-child(2)', e => timestamp_to_ms(e.textContent));
+				let song_link = document.getElementsByClassName('playbackSoundBadge__avatar')[0].href.split('?')[0];
 
                 if (title !== null && status == "playing") {
-                    conn.send(JSON.stringify({cover, title, artists, status, progress, duration}));
+                    conn.send(JSON.stringify({cover, title, artists, status, progress, duration, song_link }));
                 }
 
             } else if (hostname === 'open.spotify.com') {
@@ -71,10 +79,11 @@
                 let artists = [data.metadata.artist]
                 let progress = query('.playback-bar__progress-time-elapsed', e => timestamp_to_ms(e.textContent));
                 let duration = query('.npFSJSO1wsu3mEEGb5bh', e => timestamp_to_ms(e.textContent));
-
+				let song_link = 'https://open.spotify.com/track/' + decodeURIComponent(document.querySelectorAll('a[aria-label][data-context-item-type="track"]')[0].href).split(':').slice(-1)[0];
+				
 
                 if (title !== null && status == "playing") {
-                    conn.send(JSON.stringify({ cover, title, artists, status, progress, duration }));
+                    conn.send(JSON.stringify({ cover, title, artists, status, progress, duration, song_link }));
                 }
 
             } else if (hostname === 'www.youtube.com') {
@@ -96,6 +105,7 @@
                 let progress = query('video', e => e.currentTime * 1000);
                 let cover = navigator.mediaSession.metadata.artwork[0].src;
                 let status = navigator.mediaSession.playbackState;
+				let song_link = window.location.href.split('&')[0];
 
 
                 if (title !== null) {
@@ -109,7 +119,7 @@
                     title = title.replace(",", "");
 
                     if (status == 'playing' && progress > 0) {
-                        conn.send(JSON.stringify({ cover, title, artists, status, progress: Math.floor(progress), duration }));
+                        conn.send(JSON.stringify({ cover, title, artists, status, progress: Math.floor(progress), duration, song_link }));
                     }
                 }
             } else if (hostname === 'music.youtube.com') {
@@ -126,9 +136,14 @@
                 let cover = artwork[artwork.length - 1].src;
                 let progress = timestamp_to_ms(time[0]);
                 let duration = timestamp_to_ms(time[1]);
+				let lnk = navigator.mediaSession.metadata.artwork[0].src;
+				let song_link = 'https://www.youtube.com/watch?v=' + lnk.substring(
+					lnk.indexOf("vi/") + 3, 
+					lnk.lastIndexOf("/sddefault")
+				);
 
                 if (title !== null && status == 'playing') {
-                    conn.send(JSON.stringify({ cover, title, artists, status, progress, duration }));
+                    conn.send(JSON.stringify({ cover, title, artists, status, progress, duration, song_link }));
                 }
             }
         }, 500);
@@ -139,5 +154,7 @@
     };
 
     window.addEventListener('beforeunload', function (e) {
-        conn.send("closed - " + hostname);
+		if(conn.readyState == WebSocket.OPEN){
+			conn.send("closed - " + hostname);
+		}
     });
