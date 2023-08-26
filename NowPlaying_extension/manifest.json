@@ -1,6 +1,6 @@
 {
     "name": "Now Playing - OBS",
-    "version": "1.2.0",
+    "version": "1.2.2",
     "description": "Client for OBS now playing widget",
     "manifest_version": 3,
     "author": "Tizhproger inspired by Tuna",
