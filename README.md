@@ -14,7 +14,7 @@ Chrome - [Webstore](https://chrome.google.com/webstore/detail/now-playing-obs/gg
 
 Firefox - [Mozilla add-ons](https://addons.mozilla.org/ru/firefox/addon/now-playing-obs/)
 
-Opera - Opera addons
+Opera - [Opera addons](https://addons.opera.com/ru/extensions/details/now-playing-obs/)
 <br />
 <br />
 
