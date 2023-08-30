@@ -9,14 +9,18 @@ class Bot(commands.Bot):
         # Initialise our Bot with our access token, prefix and a list of channels to join on boot...
         super().__init__(token=acc_token, prefix='!', initial_channels=[channel])
         self._song = ''
-
+        self.uri = f"ws://localhost:8000/"
+    
 
     async def websocket_client(self):
-        uri = "ws://localhost:8000/"  # Replace with the WebSocket server URI
-        async with websockets.connect(uri) as websocket:
-            await websocket.send('connected - twitch bot')
-            while True:
-                self._song = await websocket.recv()
+        while True:
+            try:
+                async with websockets.connect(self.uri) as websocket:
+                    await websocket.send('connected - twitch bot')
+                    while True:
+                        self._song = await websocket.recv()
+            except:
+                await asyncio.sleep(2)
 
 
     async def event_ready(self):
@@ -24,22 +28,27 @@ class Bot(commands.Bot):
         print(" ")
         print("Logging to twitch profile...")
         print(f'Logged in as | {self.nick}')
-        print(f'User id is | {self.user_id}')
+        print(f'User id is | {self.user_id} \n')
         print(" ")
         await self.websocket_client()
 
 
     @commands.command(name='song', aliases=['трек', 'песня', 'track'])
     async def song(self, ctx: commands.Context):
-        data = eval(self._song)
         text = ''
-        if 'google' in data['cover']:
-            text = 'Сори, только название: ' + ','.join(data['artists']) + ' - ' + data['title']
+        if self._song == '':
+            text = 'Пока не знаю, нужно ждать...'
 
         else:
-            text = 'Текущий трек: ' + ','.join(data['artists']) + ' - ' + data['title'] + '  ' + data['song_link']
+            data = eval(self._song)
+            if 'google' in data['cover']:
+                text = 'Сори, только название: ' + ','.join(data['artists']) + ' - ' + data['title']
+
+            else:
+                text = 'Текущий трек: ' + ','.join(data['artists']) + ' - ' + data['title'] + '  ' + data['song_link']
 
         await ctx.send(f"@{ctx.author.name} {text}")
+        self._song = ''
     
 
     @commands.command(name='ping')
