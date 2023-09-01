@@ -3,17 +3,14 @@
     var join_interval = null;
     var hostname = window.location.hostname;
     const FETCH_URL = 'ws://localhost:8000/';
-	var count = 0
-	var join_retry_time = 4000
-
+    var join_retry_time = 4000
 
 
     function join() {
         conn = new WebSocket(FETCH_URL);
 
         conn.addEventListener('open', function (event) {
-            console.log('Connection Established');
-			count = 0;
+            console.log('Connection to Now Playing server established');
             conn.send("connected - " + hostname);
             start_transfer();
             if(join_interval){
@@ -23,13 +20,9 @@
         });
 
         conn.addEventListener('close', function () {
-            console.log("Connection closed, retrying...");
-			count += 1;
+            console.log("Connection to Now Playing server closed, retrying...");
             clearTimeout(join_interval);
             clearInterval(transfer_interval);
-			if(count % 20 === 0){
-				join_retry_time *= 2;
-			}
             join_interval = setTimeout(function(){join()}, join_retry_time);
         });
     };
