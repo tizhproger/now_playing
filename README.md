@@ -22,7 +22,7 @@ Opera - [Opera addons](https://addons.opera.com/ru/extensions/details/now-playin
 
 **Installation tutorial (EN)** - [Telegraph](https://telegra.ph/Installtion-guide-for-Now-Playing---OBS-widget-08-24)
 
-**Installation tutorial (RU)** - [Telegraph](https://telegra.ph/Rukovodstvo-dlya-Now-Playing--OBS-servera-s-graficheskim-interfejsom-09-02)
+**Installation tutorial (RU)** - [Telegraph](https://telegra.ph/Rukovodstvo-po-ustanovke-vidzheta-Now-Playing---OBS-08-24)
 
 **Server with GUI guide (RU)** - [Telegraph](https://telegra.ph/Rukovodstvo-dlya-Now-Playing--OBS-servera-s-graficheskim-interfejsom-09-02)
 
