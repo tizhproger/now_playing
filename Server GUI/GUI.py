@@ -4,10 +4,10 @@ from tkinter import filedialog
 import customtkinter
 import os
 import sys
-import subprocess
 import threading
 import requests
-import websocket
+import server as wss
+import background_bot as tbb
 
 app = customtkinter.CTk()
 config_object = ConfigParser()
@@ -44,42 +44,6 @@ class RedirectOutput():
     def flush(self):
         pass
 
-class WebSocketClient():
-    def __init__(self, url, widget):
-        self.url = url
-        self.messages = []
-        self.websocket = None
-        self.widget = widget
-
-    def connect(self):
-        self.websocket = websocket.WebSocketApp(self.url,
-                                                on_message=self.on_message,
-                                                on_error=self.on_error,
-                                                on_open=self.on_open)
-        self.websocket.run_forever()
-
-    def on_message(self, message, tst):
-        self.update_messages(tst)
-
-    def on_error(self, error, tst):
-        self.connect()
-
-    def on_open(self, arg1):
-        self.websocket.send('connected - gui')
-
-    def start(self):
-        websocket_thread = threading.Thread(target=self.connect)
-        websocket_thread.daemon = True
-        websocket_thread.start()
-    
-    def close(self):
-        self.websocket.close()
-
-    def update_messages(self, message):
-        self.widget.configure(state='normal')
-        self.widget.insert('end', message + '\n')
-        self.widget.configure(state='disabled')
-        self.widget.see("end")
 
 class ConfigFrame(customtkinter.CTkScrollableFrame):
     def __init__(self, master, title):
@@ -128,22 +92,6 @@ class ConfigFrame(customtkinter.CTkScrollableFrame):
                 self.config_elements[key] = combobox
 
             count += 1
-
-class AlertWindow(customtkinter.CTkToplevel):
-    def __init__(self, text_info, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.geometry("400x300")
-
-        self.label = customtkinter.CTkLabel(self, text=text_info)
-        self.label.grid(padx=20, pady=20)
-
-        bot_button = customtkinter.CTkButton(self, text='Close', command=self.close_window)
-        bot_button.grid(row=1, column=1, pady=5, padx=(45, 0), sticky='w')
-
-        self.focus()
-    
-    def close_window(self):
-        self.destroy()
 
 
 app.title("Now Playing - OBS (Server)")
@@ -232,35 +180,17 @@ def save_config():
     logs_textbox.configure(state="disabled")
 
 
-def bot_function():
-    global bot_script
-
-    start_parameters = config_frame.config_elements
-    command = ["python", 'background_bot.py', start_parameters['profile_token'].get(), start_parameters['channel_name'].get(), start_parameters['ip_address'].get(), start_parameters['port'].get()]
-    bot_script = subprocess.Popen(command, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, shell=False, creationflags = subprocess.CREATE_NO_WINDOW)
-    print(f"Starting twitch bot...")
-
-
-def server_function():
-    global server_script
-    
-    start_parameters = config_frame.config_elements
-    command = ["python", 'server.py', start_parameters['ip_address'].get(), start_parameters['port'].get()]
-    server_script = subprocess.Popen(command, stderr=subprocess.STDOUT, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=False, creationflags = subprocess.CREATE_NO_WINDOW)
-    print(f"Starting server on {start_parameters['ip_address'].get()}:{start_parameters['port'].get()}...")
-
-
 def run_server():
-    global server_thread
-
     print('')
     if config_frame.config_elements['ip_address'].get() != '' and config_frame.config_elements['port'].get() != '':
         run_button.configure(text = 'Stop server')
         run_button.configure(command = stop_server)
 
-        server_thread = threading.Thread(target=server_function)
-        server_thread.daemon = True
-        server_thread.start()
+        start_parameters = config_frame.config_elements
+        thread = threading.Thread(target=wss.run_webserver, args=(start_parameters['ip_address'].get(), start_parameters['port'].get()))
+        thread.daemon = True
+        thread.start()
+        print(f"Starting server on {start_parameters['ip_address'].get()}:{start_parameters['port'].get()}...")
 
     else:
         logs_textbox.configure(state="normal")
@@ -274,21 +204,16 @@ def run_server():
 
 
 def run_bot():
-    global bot_thread
-    
     print('')
     if config_frame.config_elements['channel_name'].get() != '' and config_frame.config_elements['profile_token'].get() != '':
         bot_button.configure(text = 'Stop bot')
         bot_button.configure(command = stop_bot)
 
-        bot_thread = threading.Thread(target=bot_function)
-        bot_thread.daemon = True
-        bot_thread.start()
-
-        if server_script == '':
-            logs_textbox.configure(state="normal")
-            logs_textbox.insert('end', 'Server not running, waiting for it... \n')
-            logs_textbox.configure(state="disabled")
+        start_parameters = config_frame.config_elements
+        thread = threading.Thread(target=tbb.run_bot, args=(start_parameters['profile_token'].get(), start_parameters['channel_name'].get(), start_parameters['ip_address'].get(), start_parameters['port'].get()))
+        thread.daemon = True
+        thread.start()
+        print(f"Starting twitch bot...")
 
     else:
         logs_textbox.configure(state="normal")
@@ -305,7 +230,7 @@ def stop_bot():
     bot_button.configure(text = 'Run bot')
     bot_button.configure(command = run_bot)
 
-    bot_script.terminate()
+    tbb.close_bot()
 
     logs_textbox.configure(state="normal")
     logs_textbox.insert('end', 'Bot stopped... \n')
@@ -316,10 +241,10 @@ def stop_server():
     run_button.configure(text = 'Run server')
     run_button.configure(command = run_server)
 
-    server_script.terminate()
+    wss.close_webserver()
 
     logs_textbox.configure(state="normal")
-    logs_textbox.insert('end', 'Server stopped... \n')
+    logs_textbox.insert('end', 'Stopping server... \n')
     logs_textbox.configure(state="disabled")
 
 
@@ -368,39 +293,25 @@ reload_button.grid(row=1, column=0, padx=25, pady=5, sticky='e')
 #Starting buttons
 if config_frame.config_elements['server_autorun'].get() == 'Yes':
     run_button = customtkinter.CTkButton(app, text='Stop server', command=stop_server)
+    run_button.grid(row=1, column=1, pady=5, padx=(0, 45), sticky='e')
     run_server()
 
 else:
     run_button = customtkinter.CTkButton(app, text='Run server', command=run_server)
-run_button.grid(row=1, column=1, pady=5, padx=(0, 45), sticky='e')
-
+    run_button.grid(row=1, column=1, pady=5, padx=(0, 45), sticky='e')
 
 if config_frame.config_elements['twitch_bot_autorun'].get() == 'Yes':
     bot_button = customtkinter.CTkButton(app, text='Stop bot', command=stop_bot)
+    bot_button.grid(row=1, column=1, pady=5, padx=(45, 0), sticky='w')
     run_bot()
 
 else:
     bot_button = customtkinter.CTkButton(app, text='Run bot', command=run_bot)
-bot_button.grid(row=1, column=1, pady=5, padx=(45, 0), sticky='w')
+    bot_button.grid(row=1, column=1, pady=5, padx=(45, 0), sticky='w')
 
-def on_closing():
-    websocket_client.close()
-    sys.stdout = old_stdout
-
-    if server_script != '':
-        server_script.terminate()
-    
-    if bot_script != '':
-        bot_script.terminate()
-
-    app.destroy()
-
-app.protocol("WM_DELETE_WINDOW", on_closing)
-
-websocket_client = WebSocketClient(f"ws://{config_frame.config_elements['ip_address'].get()}:{config_frame.config_elements['port'].get()}", logs_textbox)
-websocket_client.start()
 
 old_stdout = sys.stdout
 sys.stdout = RedirectOutput(logs_textbox)
-app.mainloop()
 
+app.mainloop()
+sys.stdout = old_stdout
