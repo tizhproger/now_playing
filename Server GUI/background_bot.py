@@ -1,8 +1,11 @@
+import os
+import certifi
 from twitchio.ext import commands
-import sys
 import asyncio
 import websockets
 
+
+exit = ''
 
 class Bot(commands.Bot):
 
@@ -26,11 +29,10 @@ class Bot(commands.Bot):
 
     async def event_ready(self):
         # We are logged in and ready to chat and use commands...
-        print(" ")
+        print(' ')
         print("Logging to twitch profile...")
         print(f'Logged in as | {self.nick}')
         print(f'User id is | {self.user_id} \n')
-        print(" ")
         await self.websocket_client()
 
 
@@ -57,14 +59,26 @@ class Bot(commands.Bot):
         await ctx.send(f"@{ctx.author.name} Я жив!")
 
 
-if __name__ == "__main__":
-    token = sys.argv[1]
-    channel = sys.argv[2]
-    ipaddress = sys.argv[3]
-    port = sys.argv[4]
+async def starting(token, channel, ipaddress, port, exit_):
+        tb = Bot(token, channel, ipaddress, port)
+        await tb.connect()
+        await exit_
+        await tb.close()
 
+def run_bot(token, channel, ipaddress, port):
+    global exit
+
+    asyncio.set_event_loop(asyncio.new_event_loop())
+    loop = asyncio.get_event_loop()
     try:
-        bot = Bot(token, channel, ipaddress, port)
-        bot.run()
+        exit = asyncio.Future()
+        loop.create_task(starting(token, channel, ipaddress, port, exit))
+        loop.run_forever()
+        loop.close()
     except Exception as e:
             print('Bot error - ' + str(e))
+
+
+def close_bot():
+    global exit
+    exit.set_result('exit')
