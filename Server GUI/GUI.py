@@ -38,8 +38,7 @@ class RedirectOutput():
         self.widget.configure(state="normal")
         self.widget.insert('end', text)
         self.widget.configure(state="disable")
-        if self.autoscroll:
-            self.widget.see("end")  # autoscroll
+        self.widget.see("end")  # autoscroll
     
     def flush(self):
         pass
@@ -129,24 +128,21 @@ def create_ini_file(config_filename):
     with open(config_filename, 'w') as configfile:
         config_object.write(configfile)
     
-    logs_textbox.configure(state="normal")
-    logs_textbox.insert('end', 'Config file now_playing_conf.ini created \n')
-    logs_textbox.configure(state="disabled")
+    print(' ')
+    print('Config file now_playing_conf.ini created \n')
 
 
 def check_config():
     if os.path.exists(config_filename):
-        logs_textbox.configure(state="normal")
-        logs_textbox.insert('end', f"Config file '{config_filename}' already exists \n")
-        logs_textbox.insert('end', 'Loading data... \n')
-        logs_textbox.configure(state="disabled")
+        print(' ')
+        print(f"Config file '{config_filename}' already exists \n")
+        print('Loading data... \n')
 
     else:
-        logs_textbox.configure(state="normal")
-        logs_textbox.insert('end', f"Config file '{config_filename}' does not exist \n")
-        logs_textbox.insert('end', 'It will be created automatically with default values... \n')
-        logs_textbox.insert('end', 'You can fill it manually, just edit config on the left panel... \n')
-        logs_textbox.configure(state="disabled")
+        print(' ')
+        print(f"Config file '{config_filename}' does not exist \n")
+        print('It will be created automatically with default values... \n')
+        print('You can fill it manually, just edit config on the left panel... \n')
 
         create_ini_file(config_filename)
 
@@ -156,16 +152,14 @@ def save_config():
     updated_config = config_frame.frame_config()
     if updated_config['twitch_bot_autorun'] not in ['Yes', 'No']:
         messagebox.showinfo("Input error", "Twitch_bot_autorun can have only 'Yes' or 'No' value!")
-        logs_textbox.configure(state="normal")
-        logs_textbox.insert('end', f"Change twitch_bot_autorun to Yes or No... \n")
-        logs_textbox.configure(state="disabled")
+        print(' ')
+        print(f"Change twitch_bot_autorun to Yes or No... \n")
         return
 
     elif updated_config['server_autorun'] not in ['Yes', 'No']:
         messagebox.showinfo("Input error", "Server_autorun can have only 'Yes' or 'No' value!")
-        logs_textbox.configure(state="normal")
-        logs_textbox.insert('end', f"Change server_autorun to Yes or No... \n")
-        logs_textbox.configure(state="disabled")
+        print(' ')
+        print(f"Change server_autorun to Yes or No... \n")
         return
     
     for section in config_object.sections():
@@ -175,55 +169,52 @@ def save_config():
     with open(config_filename, 'w') as configfile:
         config_object.write(configfile)
     
-    logs_textbox.configure(state="normal")
-    logs_textbox.insert('end', f"Config file '{config_filename}' updated... \n")
-    logs_textbox.configure(state="disabled")
+    print(' ')
+    print(f"Config file '{config_filename}' updated... \n")
 
 
 def run_server():
-    print('')
     if config_frame.config_elements['ip_address'].get() != '' and config_frame.config_elements['port'].get() != '':
         run_button.configure(text = 'Stop server')
         run_button.configure(command = stop_server)
 
         start_parameters = config_frame.config_elements
+        print(' ')
+        print(f"Starting server on {start_parameters['ip_address'].get()}:{start_parameters['port'].get()}...")
         thread = threading.Thread(target=wss.run_webserver, args=(start_parameters['ip_address'].get(), start_parameters['port'].get()))
         thread.daemon = True
         thread.start()
-        print(f"Starting server on {start_parameters['ip_address'].get()}:{start_parameters['port'].get()}...")
 
     else:
-        logs_textbox.configure(state="normal")
         if config_frame.config_elements['ip_address'].get() == '':
-            logs_textbox.insert('end', "Server can not be started, missing 'ip_address'... \n")
+            print(' ')
+            print("Server can not be started, missing 'ip_address'... \n")
 
         if config_frame.config_elements['port'].get() == '':
-            logs_textbox.insert('end', "Server can not be started, missing 'port'... \n")
-
-        logs_textbox.configure(state="disabled")
+            print(' ')
+            print("Server can not be started, missing 'port'... \n")
 
 
 def run_bot():
-    print('')
     if config_frame.config_elements['channel_name'].get() != '' and config_frame.config_elements['profile_token'].get() != '':
         bot_button.configure(text = 'Stop bot')
         bot_button.configure(command = stop_bot)
 
+        print(' ')
+        print(f"Starting twitch bot...")
         start_parameters = config_frame.config_elements
         thread = threading.Thread(target=tbb.run_bot, args=(start_parameters['profile_token'].get(), start_parameters['channel_name'].get(), start_parameters['ip_address'].get(), start_parameters['port'].get()))
         thread.daemon = True
         thread.start()
-        print(f"Starting twitch bot...")
 
     else:
-        logs_textbox.configure(state="normal")
         if config_frame.config_elements['profile_token'].get() == '':
-            logs_textbox.insert('end', "Bot can not be started, missing 'profile_token'... \n")
+            print(' ')
+            print("Bot can not be started, missing 'profile_token'... \n")
 
         if config_frame.config_elements['channel_name'].get() == '':
-            logs_textbox.insert('end', "Bot can not be started, missing 'channel_name'... \n")
-
-        logs_textbox.configure(state="disabled")
+            print(' ')
+            print("Bot can not be started, missing 'channel_name'... \n")
 
 
 def stop_bot():
@@ -232,9 +223,8 @@ def stop_bot():
 
     tbb.close_bot()
 
-    logs_textbox.configure(state="normal")
-    logs_textbox.insert('end', 'Bot stopped... \n')
-    logs_textbox.configure(state="disabled")
+    print(' ')
+    print('Bot stopped... \n')
 
 
 def stop_server():
@@ -243,31 +233,30 @@ def stop_server():
 
     wss.close_webserver()
 
-    logs_textbox.configure(state="normal")
-    logs_textbox.insert('end', 'Stopping server... \n')
-    logs_textbox.configure(state="disabled")
+    print(' ')
+    print('Stopping server... \n')
 
 
 def download_widget(value):
     if 'default' in value:
-        url = 'https://raw.githubusercontent.com/tizhproger/now_playing/main/Widget%20page/NowPlaying.html'
+        url = 'https://drive.google.com/uc?id=1f1JJjZKcnO96KP53KpuZdBTcMu-qIcf_&export=download'
+        filename = 'NowPlaying'
     else:
-        url = 'https://raw.githubusercontent.com/tizhproger/now_playing/main/Widget%20page/NowPlaying_hiding.html'
+        url = 'https://drive.google.com/uc?id=1YykGLquiBrVPnNjphaa8Rd-VwAimjL5U&export=download'
+        filename = 'NowPlaying_hiding'
 
-    filename = url.split('/')[-1]
     response = requests.get(url)
     if response.status_code == 200:
         file_path = filedialog.asksaveasfilename(defaultextension=".html", filetypes=[("HTML Files")], initialfile=filename)
         if file_path:
             with open(file_path, "wb") as file:
                 file.write(response.content)
-        
-            logs_textbox.configure(state="normal")
-            logs_textbox.insert('end', f"Widget {filename} downloaded \n")
-            logs_textbox.insert('end', f"Path {file_path} \n")
-            logs_textbox.configure(state="disabled")
+            print(' ')
+            print(f"Widget {filename} downloaded")
+            print(f"Path {file_path}")
 
     else:
+        print(' ')
         print("Failed to download file")
     
     widgets_button.set('')
@@ -290,6 +279,9 @@ save_button.grid(row=1, column=0, padx=64, pady=5, sticky='e')
 reload_button = customtkinter.CTkButton(app, text='⟳', width=30, command=config_frame.update)
 reload_button.grid(row=1, column=0, padx=25, pady=5, sticky='e')
 
+old_stdout = sys.stdout
+sys.stdout = RedirectOutput(logs_textbox)
+
 #Starting buttons
 if config_frame.config_elements['server_autorun'].get() == 'Yes':
     run_button = customtkinter.CTkButton(app, text='Stop server', command=stop_server)
@@ -308,10 +300,6 @@ if config_frame.config_elements['twitch_bot_autorun'].get() == 'Yes':
 else:
     bot_button = customtkinter.CTkButton(app, text='Run bot', command=run_bot)
     bot_button.grid(row=1, column=1, pady=5, padx=(45, 0), sticky='w')
-
-
-old_stdout = sys.stdout
-sys.stdout = RedirectOutput(logs_textbox)
 
 app.mainloop()
 sys.stdout = old_stdout
