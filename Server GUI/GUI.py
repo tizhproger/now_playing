@@ -129,20 +129,20 @@ def create_ini_file(config_filename):
         config_object.write(configfile)
     
     print(' ')
-    print('Config file now_playing_conf.ini created \n')
+    print('Config file now_playing_conf.ini created')
 
 
 def check_config():
     if os.path.exists(config_filename):
         print(' ')
-        print(f"Config file '{config_filename}' already exists \n")
-        print('Loading data... \n')
+        print(f"Config file '{config_filename}' already exists")
+        print('Loading data...')
 
     else:
         print(' ')
-        print(f"Config file '{config_filename}' does not exist \n")
-        print('It will be created automatically with default values... \n')
-        print('You can fill it manually, just edit config on the left panel... \n')
+        print(f"Config file '{config_filename}' does not exist")
+        print('It will be created automatically with default values...')
+        print('You can fill it manually, just edit config on the left panel...')
 
         create_ini_file(config_filename)
 
@@ -153,13 +153,13 @@ def save_config():
     if updated_config['twitch_bot_autorun'] not in ['Yes', 'No']:
         messagebox.showinfo("Input error", "Twitch_bot_autorun can have only 'Yes' or 'No' value!")
         print(' ')
-        print(f"Change twitch_bot_autorun to Yes or No... \n")
+        print(f"Change twitch_bot_autorun to Yes or No...")
         return
 
     elif updated_config['server_autorun'] not in ['Yes', 'No']:
         messagebox.showinfo("Input error", "Server_autorun can have only 'Yes' or 'No' value!")
         print(' ')
-        print(f"Change server_autorun to Yes or No... \n")
+        print(f"Change server_autorun to Yes or No...")
         return
     
     for section in config_object.sections():
@@ -170,7 +170,7 @@ def save_config():
         config_object.write(configfile)
     
     print(' ')
-    print(f"Config file '{config_filename}' updated... \n")
+    print(f"Config file '{config_filename}' updated...")
 
 
 def run_server():
@@ -188,11 +188,11 @@ def run_server():
     else:
         if config_frame.config_elements['ip_address'].get() == '':
             print(' ')
-            print("Server can not be started, missing 'ip_address'... \n")
+            print("Server can not be started, missing 'ip_address'...")
 
         if config_frame.config_elements['port'].get() == '':
             print(' ')
-            print("Server can not be started, missing 'port'... \n")
+            print("Server can not be started, missing 'port'...")
 
 
 def run_bot():
@@ -210,11 +210,11 @@ def run_bot():
     else:
         if config_frame.config_elements['profile_token'].get() == '':
             print(' ')
-            print("Bot can not be started, missing 'profile_token'... \n")
+            print("Bot can not be started, missing 'profile_token'...")
 
         if config_frame.config_elements['channel_name'].get() == '':
             print(' ')
-            print("Bot can not be started, missing 'channel_name'... \n")
+            print("Bot can not be started, missing 'channel_name'...")
 
 
 def stop_bot():
@@ -224,7 +224,7 @@ def stop_bot():
     tbb.close_bot()
 
     print(' ')
-    print('Bot stopped... \n')
+    print('Bot stopped...')
 
 
 def stop_server():
@@ -234,7 +234,7 @@ def stop_server():
     wss.close_webserver()
 
     print(' ')
-    print('Stopping server... \n')
+    print('Stopping server...')
 
 
 def download_widget(value):
@@ -266,6 +266,9 @@ logs_textbox = customtkinter.CTkTextbox(app, width=400, height=300)
 logs_textbox.configure(state="disabled")
 logs_textbox.grid(row=0, column=1, padx=20, pady=20)
 
+old_stdout = sys.stdout
+sys.stdout = RedirectOutput(logs_textbox)
+
 #Config section
 check_config()
 config_frame = ConfigFrame(app, 'Server config')
@@ -279,8 +282,7 @@ save_button.grid(row=1, column=0, padx=64, pady=5, sticky='e')
 reload_button = customtkinter.CTkButton(app, text='⟳', width=30, command=config_frame.update)
 reload_button.grid(row=1, column=0, padx=25, pady=5, sticky='e')
 
-old_stdout = sys.stdout
-sys.stdout = RedirectOutput(logs_textbox)
+
 
 #Starting buttons
 if config_frame.config_elements['server_autorun'].get() == 'Yes':
