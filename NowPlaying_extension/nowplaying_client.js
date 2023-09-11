@@ -3,7 +3,7 @@
     var join_interval = null;
     var hostname = window.location.hostname;
     const FETCH_URL = 'ws://localhost:8000/';
-    var join_retry_time = 4000
+	var join_retry_time = 4000
 
 
     function join() {
@@ -57,7 +57,10 @@
                 let artists = [ query('.playbackSoundBadge__lightLink', e => e.title) ];
                 let progress = query('.playbackTimeline__timePassed span:nth-child(2)', e => timestamp_to_ms(e.textContent));
                 let duration = query('.playbackTimeline__duration span:nth-child(2)', e => timestamp_to_ms(e.textContent));
-				let song_link = document.getElementsByClassName('playbackSoundBadge__avatar')[0].href.split('?')[0];
+				let song_link = ''
+				if(document.getElementsByClassName('playbackSoundBadge__avatar').length > 0){
+					song_link = document.getElementsByClassName('playbackSoundBadge__avatar')[0].href.split('?')[0];
+				}
 
                 if (title !== null && status == "playing") {
                     conn.send(JSON.stringify({cover, title, artists, status, progress, duration, song_link }));
@@ -67,12 +70,20 @@
 
                 let data = navigator.mediaSession;
                 let status = query('.vnCew8qzJq3cVGlYFXRI', e => e === null ? 'stopped' : (e.getAttribute('aria-label') === 'Play' || e.getAttribute('aria-label') === 'Слушать' ? 'stopped' : 'playing'));
-                let cover = data.metadata.artwork[0].src;
-                let title = data.metadata.title
-                let artists = [data.metadata.artist]
+                let cover = ''
+				let title = ''
+				let artists = ''
+				if(data.metadata != null){
+					cover = data.metadata.artwork[0].src;
+					title = data.metadata.title
+					artists = [data.metadata.artist]
+				}
                 let progress = query('.playback-bar__progress-time-elapsed', e => timestamp_to_ms(e.textContent));
                 let duration = query('.npFSJSO1wsu3mEEGb5bh', e => timestamp_to_ms(e.textContent));
-				let song_link = 'https://open.spotify.com/track/' + decodeURIComponent(document.querySelectorAll('a[aria-label][data-context-item-type="track"]')[0].href).split(':').slice(-1)[0];
+				let song_link = ''
+				if(document.querySelectorAll('a[aria-label][data-context-item-type="track"]').length > 0){
+					song_link = 'https://open.spotify.com/track/' + decodeURIComponent(document.querySelectorAll('a[aria-label][data-context-item-type="track"]')[0].href).split(':').slice(-1)[0];
+				}
 				
 
                 if (title !== null && status == "playing") {
