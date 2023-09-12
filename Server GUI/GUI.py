@@ -8,6 +8,7 @@ import threading
 import requests
 import server as wss
 import background_bot as tbb
+import widgets_server as ows
 
 app = customtkinter.CTk()
 config_object = ConfigParser()
@@ -267,7 +268,9 @@ logs_textbox.configure(state="disabled")
 logs_textbox.grid(row=0, column=1, padx=20, pady=20)
 
 old_stdout = sys.stdout
+old_stderr = sys.stderr
 sys.stdout = RedirectOutput(logs_textbox)
+sys.stderr = RedirectOutput(logs_textbox)
 
 #Config section
 check_config()
@@ -303,5 +306,17 @@ else:
     bot_button = customtkinter.CTkButton(app, text='Run bot', command=run_bot)
     bot_button.grid(row=1, column=1, pady=5, padx=(45, 0), sticky='w')
 
+widgets = threading.Thread(target=ows.run_widgets, args=(9000,))
+widgets.daemon = True
+widgets.start()
+
+print(os.getcwd())
+
+def on_closing():
+    sys.stdout = old_stdout
+    sys.stderr = old_stderr
+    ows.close_widgets()
+    app.destroy()
+
+app.protocol("WM_DELETE_WINDOW", on_closing)
 app.mainloop()
-sys.stdout = old_stdout
