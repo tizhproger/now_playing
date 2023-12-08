@@ -1,6 +1,7 @@
 # Now Playing widget for OBS
 
 > Currently working with Chrome, Firefox and Opera.
+> На данный момент работает с Chrome, Firefox and Opera.
 
 > Also important to note, that server part designed to work only on windows. Other OS like MacOS or Linux will be added later. If you can write the server part for listed OS, feel free to contribute!
 <br />
@@ -8,7 +9,7 @@
 This repository was based on [Tuna project](https://obsproject.com/forum/resources/tuna.843/) and is a modification of it.
 <br />
 <br />
-Web extension for:
+Web extensions / Расширения браузера:
 
 Chrome - [Webstore](https://chrome.google.com/webstore/detail/now-playing-obs/ggkicimibhpmfkoepnlbbdomnkfkmcie)
 
@@ -18,12 +19,12 @@ Opera - [Opera addons](https://addons.opera.com/ru/extensions/details/now-playin
 <br />
 <br />
 
-**Usage example** - [YouTube](https://www.youtube.com/watch?v=1kKZyg3AEGY)
+**Usage example**/**Пример спользования** - [YouTube](https://www.youtube.com/watch?v=1kKZyg3AEGY)
 
 
-**Installation tutorial (RU)** - [Telegraph](https://telegra.ph/Rukovodstvo-dlya-Now-Playing--OBS-servera-s-graficheskim-interfejsom-09-02)
+**Гайд по установке** - [Telegraph](https://telegra.ph/Rukovodstvo-dlya-Now-Playing--OBS-servera-s-graficheskim-interfejsom-09-02)
 
-**Installation tutorial (EN)** - [Telegraph](https://telegra.ph/Guide-for-Now-Playing---OBS-server-with-GUI-09-02)
+**Installation guide** - [Telegraph](https://telegra.ph/Guide-for-Now-Playing---OBS-server-with-GUI-09-02)
 <br />
 <br />
 
