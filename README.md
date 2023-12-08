@@ -19,7 +19,7 @@ Opera - [Opera addons](https://addons.opera.com/ru/extensions/details/now-playin
 <br />
 <br />
 
-**Usage example**/**Пример спользования** - [YouTube](https://www.youtube.com/watch?v=1kKZyg3AEGY)
+**Usage example** / **Пример спользования** - [YouTube](https://www.youtube.com/watch?v=1kKZyg3AEGY)
 
 
 **Гайд по установке** - [Telegraph](https://telegra.ph/Rukovodstvo-dlya-Now-Playing--OBS-servera-s-graficheskim-interfejsom-09-02)
