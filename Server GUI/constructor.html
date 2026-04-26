@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Now Playing – OBS Widget Constructor</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --fg: #e6e6e6;
+      --muted: #94a3b8;
+      --card: #151922;
+      --acc: #8b5cf6;
+      --border: #2a3240;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Noto Sans", "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
+    a { color: var(--fg); }
+    .container { display: grid; grid-template-columns: minmax(420px, 520px) 1fr; height: 100dvh; }
+    .panel { padding: 16px; overflow: auto; border-right: 1px solid var(--border); }
+    .panel h2 { margin: 0 0 12px; font-size: 16px; }
+    .section { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 12px; }
+    .row { display: grid; grid-template-columns: 44% 56%; align-items: center; gap: 8px; margin: 8px 0; }
+    .row > label { color: var(--muted); font-size: 12px; }
+    input[type="text"], input[type="number"], select { width: 100%; background: #0c0f14; color: var(--fg); border: 1px solid var(--border); border-radius: 8px; padding: 8px; }
+    input[type="color"] { width: 100%; height: 36px; border-radius: 8px; border: 1px solid var(--border); background: #0c0f14; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .rn { display: grid; grid-template-columns: 1fr 92px; gap: 8px; align-items: center; }
+    input[type="range"] { width: 100%; }
+    .btn { appearance: none; border: 1px solid var(--border); background: #1a2030; color: var(--fg); padding: 8px 10px; border-radius: 8px; cursor: pointer; }
+    .btn:hover { background: #20273a; }
+    .btn.acc { border-color: transparent; background: var(--acc); color: #0b0b0b; font-weight: 700; }
+    .muted { color: var(--muted); font-size: 12px; }
+    .preview { padding: 16px; display: grid; grid-template-rows: auto 1fr; gap: 12px; height: 100%; }
+    .urlbox { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; }
+    .frameHost { border: 1px solid var(--border); border-radius: 12px; background: #0c0f14; padding: 14px; overflow: auto; }
+    .frameHostInner { min-height: 100%; display: flex; align-items: flex-start; justify-content: center; }
+    iframe { border: 1px solid var(--border); border-radius: 12px; background: #0c0f14; }
+    code { user-select: all; display: block; background: #0c0f14; border: 1px solid var(--border); border-radius: 8px; padding: 8px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12px; overflow: auto; }
+    .k { color: #a3e635; }
+    .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; }
+    .checks label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--fg); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="panel">
+      <h2>🎛️ Now Playing – Widget Constructor</h2>
+      <div class="section">
+        <div class="row"><label>Widget type</label>
+          <select id="widget">
+            <option value="default.html">Standard</option>
+            <option value="hiding.html">Auto‑hide on idle</option>
+          </select>
+        </div>
+        <div class="row"><label>WebSocket URL</label> <input id="ws" type="text" placeholder="ws://localhost:8000/" value="ws://localhost:8000/" /></div>
+        <div class="row"><label>Font preset</label>
+          <select id="fontPreset">
+            <option value="system">System UI</option>
+            <option value="segoe" selected>Segoe UI</option>
+            <option value="arial">Arial</option>
+            <option value="roboto">Roboto</option>
+            <option value="inter">Inter</option>
+            <option value="montserrat">Montserrat</option>
+            <option value="poppins">Poppins</option>
+            <option value="nunito">Nunito</option>
+            <option value="georgia">Georgia</option>
+            <option value="times">Times New Roman</option>
+            <option value="mono">Monospace</option>
+            <option value="custom">Custom…</option>
+          </select>
+        </div>
+        <div class="row"><label>Font stack</label> <input id="font" type="text" placeholder="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" value="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" /></div>
+
+        <div class="row"><label>Google Font preset (opt.)</label>
+          <select id="gfontPreset">
+            <option value="">—</option>
+            <option value="Inter:wght@400;700">Inter</option>
+            <option value="Roboto:wght@400;700">Roboto</option>
+            <option value="Montserrat:wght@400;700">Montserrat</option>
+            <option value="Poppins:wght@400;700">Poppins</option>
+            <option value="Nunito:wght@400;700">Nunito</option>
+            <option value="Source+Sans+3:wght@400;700">Source Sans 3</option>
+          </select>
+        </div>
+        <div class="row"><label>Google Font (opt.)</label> <input id="gfont" type="text" placeholder="Inter:wght@400;700" /></div>
+		<div class="row"><label>Title size (px)</label>
+		<div class="rn">
+		  <input id="titleSizeRange" type="range" min="10" max="72" value="20" />
+		  <input id="titleSize" type="number" min="10" max="72" value="20" />
+		</div>
+		</div>
+		<div class="row"><label>Artist size (px)</label>
+		<div class="rn">
+		  <input id="artistSizeRange" type="range" min="8" max="60" value="16" />
+		  <input id="artistSize" type="number" min="8" max="60" value="16" />
+		</div>
+		</div>
+		<div class="row stdOnly"><label>Bar height (px)</label>
+		<div class="rn">
+		  <input id="barHeightRange" type="range" min="2" max="24" value="6" />
+		  <input id="barHeight" type="number" min="2" max="24" value="6" />
+		</div>
+		</div>
+		<div class="row"><label>Widget height (px)</label>
+		<div class="rn">
+		  <input id="heightRange" type="range" min="44" max="420" value="120" />
+		  <input id="height" type="number" min="64" max="420" value="120" />
+		</div>
+		</div>
+        <div class="row"><label>Widget width (px)</label>
+          <div class="rn">
+            <input id="widthRange" type="range" min="240" max="1400" value="640" />
+            <input id="width" type="number" min="260" max="1400" value="640" />
+          </div>
+        </div>
+        
+        <div class="row stdOnly"><label>Cover size (px)</label>
+          <div class="rn">
+            <input id="coverSizeRange" type="range" min="0" max="240" value="0" />
+            <input id="coverSize" type="number" min="0" max="240" value="0" />
+          </div>
+        </div>
+        <p class="muted" style="margin: 4px 0 0;">Tip: set <b>0</b> for auto (fit widget height).</p>
+
+		<div class="row"><label>Radius (px)</label>
+		<div class="rn">
+		  <input id="radiusRange" type="range" min="0" max="40" value="4" />
+		  <input id="radius" type="number" min="0" max="40" value="4" />
+		</div>
+		</div>
+		<div class="row"><label>Shadow (px)</label>
+		<div class="rn">
+		  <input id="shadowRange" type="range" min="0" max="24" value="5" />
+		  <input id="shadow" type="number" min="0" max="24" value="5" />
+		</div>
+		</div>
+		</div>
+
+      <div class="section">
+        <div class="grid-2">
+          <div class="row"><label>Background</label>
+            <div class="rn">
+              <input id="bgColor" type="color" value="#2c2c2c" />
+              <input id="bg" type="text" value="rgb(44, 44, 44)" />
+            </div>
+          </div>
+          <div class="row"><label>Text</label> <input id="text" type="color" value="#ffffff" /></div>
+        </div>
+        <div class="grid-2">
+          <div class="row"><label>Accent</label> <input id="accent" type="color" value="#dffdb3" /></div>
+          <div class="row stdOnly"><label>Preview cover URL (opt.)</label> <input id="demoCover" type="text" placeholder="https://i.ibb.co/z41bX3P/placeholder.png" /></div>
+        </div>
+        <div class="section stdOnly">
+          <div class="checks">
+            <label><input type="checkbox" id="compact" /> Compact layout</label>
+            <label><input type="checkbox" id="marquee" /> Marquee long titles</label>
+            <label><input type="checkbox" id="cover" checked /> Show cover</label>
+            <label><input type="checkbox" id="timeline" checked /> Show timeline</label>
+			<label><input type="checkbox" id="accentAuto" checked /> Accent: Auto (from cover)</label>
+			<label><input type="checkbox" id="artist" checked /> Show artist</label>
+          </div>
+        </div>
+        
+        <div class="row">
+          <label>Transparent background</label>
+          <label style="display:flex; align-items:center; gap:8px; color: var(--fg);">
+            <input type="checkbox" id="bgTransparent" />
+            Enable
+          </label>
+        </div>
+<p class="muted">Hint: in <span class="k">Background</span> any CSS‑values can be used: <code>rgba(44,44,44,0.8)</code>, <code>#151515</code>, <code>linear-gradient(...)</code>.</p>
+      </div>
+
+      <div class="section">
+        <div class="grid-3">
+          <button class="btn" id="reset">Reset</button>
+          <button class="btn" id="refresh">Refresh</button>
+          <button class="btn acc" id="copy">Copy URL</button>
+        </div>
+      </div>
+
+      <p class="muted">💡 How to add in OBS: <b>View → Docks → Custom Browser Docks…</b> → enter name and URL from block above. Widget is connected as a separate Browser Source by generated link.</p>
+    </div>
+
+    <div class="preview">
+      <div class="urlbox">
+        <code id="url"></code>
+        <button class="btn" id="open">Open</button>
+      </div>
+      <div class="frameHost">
+        <div class="frameHostInner">
+          <iframe id="frame" sandbox="allow-scripts allow-same-origin" referrerpolicy="no-referrer"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const qs = (id) => document.getElementById(id);
+    const inputs = [
+      "widget","ws",
+      "fontPreset","font","gfontPreset","gfont",
+      "titleSize","artistSize","barHeight","width","height","coverSize","radius","shadow",
+      "bgColor","bg","bgTransparent","text","accent", "accentAuto", "artist",
+      "compact","marquee","cover","timeline","demoCover"
+    ];
+
+    const state = Object.fromEntries(inputs.map(id => [id, (qs(id)?.type === 'checkbox') ? qs(id).checked : qs(id).value]));
+
+    let lastBgText = qs('bg')?.value || 'rgb(44, 44, 44)';
+    let lastBgColor = qs('bgColor')?.value || '#2c2c2c';
+
+    function buildURL(){
+      const base = state.widget || 'default.html';
+      const p = new URLSearchParams();
+      if(state.ws) p.set('ws', state.ws);
+      if(state.font) p.set('font', state.font);
+      if(state.titleSize) p.set('titleSize', state.titleSize);
+      if(state.artistSize) p.set('artistSize', state.artistSize);
+      if(state.barHeight) p.set('barHeight', state.barHeight);
+      if(state.width) p.set('width', state.width);
+      if(state.coverSize && state.coverSize !== '0' && state.cover) p.set('coverSize', state.coverSize);
+      if(state.radius) p.set('radius', state.radius);
+      if(state.shadow) p.set('shadow', state.shadow);
+      if(state.bg) p.set('bg', state.bg);
+      if(state.text) p.set('text', state.text);
+      if (state.accentAuto) {
+		  p.set('accent', 'auto');
+		} else if (state.accent) {
+		  p.set('accent', state.accent);
+		};
+	  if(state.height) p.set('artist', state.artist);
+      if(state.height) p.set('height', state.height);
+      if(state.gfont && state.gfont.trim()) p.set('gfont', state.gfont.trim());
+      if(state.compact) p.set('compact','1');
+      if(state.marquee) p.set('marquee','1');
+      if(!state.cover) p.set('cover','0');
+      if(!state.timeline) p.set('timeline','0');
+      if(state.demoCover) p.set('demoCover', state.demoCover.trim());
+      return base + '?' + p.toString();
+    }
+
+    function apply(){
+      // sync state
+      inputs.forEach(id => state[id] = (qs(id)?.type === 'checkbox') ? qs(id).checked : qs(id).value);
+
+      // Transparent background toggle
+      const bgT = !!state.bgTransparent;
+      const bgInp = qs('bg');
+      const bgCol = qs('bgColor');
+      if (bgT) {
+        if (bgInp && bgInp.value !== 'transparent') {
+          lastBgText = bgInp.value || lastBgText;
+          lastBgColor = bgCol ? bgCol.value : lastBgColor;
+        }
+        if (bgInp) bgInp.value = 'transparent';
+        if (bgInp) bgInp.disabled = true;
+        if (bgCol) bgCol.disabled = true;
+        state.bg = 'transparent';
+      } else {
+        if (bgInp) bgInp.disabled = false;
+        if (bgCol) bgCol.disabled = false;
+        if (bgInp && bgInp.value === 'transparent') {
+          bgInp.value = lastBgText || 'rgb(44, 44, 44)';
+        }
+      }
+
+      // Keep background color picker in sync with bg text when possible
+      syncBgPickerFromText();
+
+      // Disable cover size controls when cover is off
+      const coverOn = !!state.cover;
+      const csr = qs('coverSizeRange');
+      const csn = qs('coverSize');
+      if (csr) csr.disabled = !coverOn;
+      if (csn) csn.disabled = !coverOn;
+
+
+      const href = buildURL();
+      // preview URL is relative to this file (widgets root)
+      const origin = location.origin;
+      qs('url').textContent = origin + '/' + href;
+      const frame = qs('frame');
+
+      // Preview size: include widget margins (8px each side in widget pages)
+      const w = Number(state.width || 0);
+      const h = Number(state.height || 0);
+	  const outerMargin = 35;
+	  const outerMarginH = 35;
+      if (Number.isFinite(w)) frame.style.width  = (w + outerMargin) + 'px';
+      else frame.style.width = '100%';
+      if (Number.isFinite(h)) frame.style.height = (h + outerMarginH) + 'px';
+
+
+      const bust = href + (href.includes('?') ? '&' : '?') + `_ts=${Date.now()}`;
+	  frame.src = bust;
+	  qs('accent').disabled = !!state.accentAuto;
+    }
+
+    function bindRangeNumber(rangeId, numberId){
+      const r = qs(rangeId);
+      const n = qs(numberId);
+      if(!r || !n) return;
+      const sync = (src, dst) => {
+        dst.value = src.value;
+        apply();
+      };
+      r.addEventListener('input', () => sync(r, n));
+      n.addEventListener('input', () => sync(n, r));
+    }
+
+    // range + number sync
+    bindRangeNumber('titleSizeRange','titleSize');
+    bindRangeNumber('artistSizeRange','artistSize');
+    bindRangeNumber('barHeightRange','barHeight');
+    bindRangeNumber('widthRange','width');
+    bindRangeNumber('heightRange','height');
+    bindRangeNumber('coverSizeRange','coverSize');
+    bindRangeNumber('radiusRange','radius');
+    bindRangeNumber('shadowRange','shadow');
+    bindRangeNumber('padRange','pad');
+    bindRangeNumber('gapRange','gap');
+
+    // Font presets
+    const fontPresets = {
+      system: 'system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Noto Sans", "Helvetica Neue", Arial, sans-serif',
+      segoe: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+      arial: "Arial, 'Helvetica Neue', Helvetica, sans-serif",
+      roboto: "Roboto, system-ui, -apple-system, Segoe UI, Arial, sans-serif",
+      inter: "Inter, system-ui, -apple-system, Segoe UI, Arial, sans-serif",
+      montserrat: "Montserrat, system-ui, -apple-system, Segoe UI, Arial, sans-serif",
+      poppins: "Poppins, system-ui, -apple-system, Segoe UI, Arial, sans-serif",
+      nunito: "Nunito, system-ui, -apple-system, Segoe UI, Arial, sans-serif",
+      georgia: "Georgia, 'Times New Roman', Times, serif",
+      times: "'Times New Roman', Times, serif",
+      mono: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
+    };
+
+    qs('fontPreset')?.addEventListener('change', () => {
+      const v = qs('fontPreset').value;
+      if (v !== 'custom' && fontPresets[v]) {
+        qs('font').value = fontPresets[v];
+      }
+      apply();
+    });
+
+    qs('gfontPreset')?.addEventListener('change', () => {
+      const v = qs('gfontPreset').value;
+      qs('gfont').value = v;
+      if (v) {
+        const fam = v.split(':')[0].replace(/\+/g, ' ');
+        const current = qs('font').value || fontPresets.segoe;
+        if (!current.toLowerCase().includes(fam.toLowerCase())) {
+          qs('font').value = `'${fam}', ${current}`;
+        }
+      }
+      apply();
+    });
+
+    // Background picker sync
+    function rgbToHex(rgb){
+      const m = rgb.replace(/\s+/g,'').match(/^rgb\((\d+),(\d+),(\d+)\)$/i);
+      if(!m) return null;
+      const r = Math.max(0, Math.min(255, parseInt(m[1],10)));
+      const g = Math.max(0, Math.min(255, parseInt(m[2],10)));
+      const b = Math.max(0, Math.min(255, parseInt(m[3],10)));
+      return '#' + [r,g,b].map(x => x.toString(16).padStart(2,'0')).join('');
+    }
+    function syncBgPickerFromText(){
+      const t = (qs('bg')?.value || '').trim();
+      let hex = null;
+      if(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(t)) {
+        hex = t.length === 4
+          ? '#' + t.slice(1).split('').map(ch => ch + ch).join('')
+          : t;
+      } else {
+        hex = rgbToHex(t);
+      }
+      if(hex && qs('bgColor')) qs('bgColor').value = hex.toLowerCase();
+    }
+    qs('bgColor')?.addEventListener('input', () => {
+      qs('bg').value = qs('bgColor').value;
+      apply();
+    });
+
+    // generic input handlers (non-range)
+    inputs.forEach(id => {
+      const el = qs(id);
+      if (!el) return;
+      if (el.type === 'range') return;
+      el.addEventListener('input', apply);
+    });
+    qs('refresh').addEventListener('click', apply);
+    qs('reset').addEventListener('click', () => { window.location.reload(); });
+    qs('copy').addEventListener('click', async () => {
+      const text = qs('url').textContent || ('/' + buildURL());
+      try { await navigator.clipboard.writeText(text); qs('copy').textContent = 'Copied!'; setTimeout(()=>qs('copy').textContent='Copy URL', 1000);} catch(e){ alert('Copy failed'); }
+    });
+    qs('open').addEventListener('click', () => { window.open(buildURL(), '_blank'); });
+
+    // Demo cover swap (optional): if set, override cover in preview via query param 'demoCover'
+    qs('demoCover').addEventListener('input', () => { apply(); });
+
+    // First run
+    apply();
+  </script>
+</body>
+</html>
