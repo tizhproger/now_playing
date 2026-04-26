@@ -1,5 +1,7 @@
 # Now Playing widget for OBS
 
+# V2 is out now! New customization options, extended settings and more.
+
 > Currently working with Chrome, Firefox and Opera.
 > На данный момент работает с Chrome, Firefox and Opera.
 
