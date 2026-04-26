@@ -1,27 +1,42 @@
 import http.server
 import socketserver
+import os
+import sys
+from functools import partial
 
-server = ''
-running = True
+_server = None
 
-# The main behavior function for this server
-def run_widgets(port):
-    global server, running
+def get_web_root() -> str:
+    if getattr(sys, "frozen", False):
+        return getattr(sys, "_MEIPASS", os.path.dirname(sys.executable))
+    return os.path.dirname(os.path.abspath(__file__))
+
+class QuietHandler(http.server.SimpleHTTPRequestHandler):
+    def log_message(self, format, *args):
+        return
+
+class ThreadingHTTPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+    allow_reuse_address = True
+    daemon_threads = True
+
+def run_widgets(port: int):
+    global _server
     try:
-        Handler = http.server.SimpleHTTPRequestHandler
-        with socketserver.TCPServer(("", port), Handler) as httpd:
-            print("Serving widgets on port " + str(port))
-            server = httpd
-            while running:
-                httpd.handle_request()
-
-    # Handle disconnecting clients 
+        web_root = get_web_root()
+        handler = partial(QuietHandler, directory=web_root)
+        with ThreadingHTTPServer(("", int(port)), handler) as httpd:
+            _server = httpd
+            print(f"Hosting widgets on localhost:{port} (dir={web_root})")
+            httpd.serve_forever(poll_interval=0.5)
     except Exception as e:
-        print(str(e))
-
+        print("Widgets host error:", repr(e))
 
 def close_widgets():
-    global server, running
-
-    running = False
-    server.server_close()
+    global _server
+    try:
+        if _server:
+            _server.shutdown()
+            _server.server_close()
+            _server = None
+    except Exception:
+        pass
