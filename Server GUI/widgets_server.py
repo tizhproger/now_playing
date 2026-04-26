@@ -12,6 +12,13 @@ def get_web_root() -> str:
     return os.path.dirname(os.path.abspath(__file__))
 
 class QuietHandler(http.server.SimpleHTTPRequestHandler):
+    extensions_map = http.server.SimpleHTTPRequestHandler.extensions_map.copy()
+    extensions_map.update({
+        ".html": "text/html; charset=utf-8",
+        ".js":   "application/javascript; charset=utf-8",
+        ".css":  "text/css; charset=utf-8",
+    })
+
     def log_message(self, format, *args):
         return
 
