@@ -1,20 +1,53 @@
 {
-    "name": "Now Playing - OBS",
-    "version": "1.2.5",
-    "description": "Client for OBS now playing widget",
-    "manifest_version": 3,
-    "author": "Tizhproger inspired by Tuna",
-    "content_scripts": [
-        {
-        "matches": ["https://*.youtube.com/*", "https://*.spotify.com/*", "https://*.soundcloud.com/*"],
-        "js": ["nowplaying_client.js"]
-        }
+  "manifest_version": 3,
+  "name": "Now Playing - OBS",
+  "version": "1.3.1",
+  "description": "Client for OBS now playing widget",
+  "author": "Tizhproger inspired by Tuna",
+
+  "permissions": [
+    "storage",
+    "contextMenus"
+  ],
+
+  "host_permissions": [
+    "https://*.youtube.com/*",
+    "https://music.youtube.com/*",
+    "https://open.spotify.com/*",
+    "https://*.spotify.com/*",
+    "https://soundcloud.com/*",
+    "https://*.soundcloud.com/*",
+	
+	"ws://localhost/*",
+    "ws://127.0.0.1/*",
+    "ws://[::1]/*"
+  ],
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.youtube.com/*",
+        "https://music.youtube.com/*",
+        "https://open.spotify.com/*",
+        "https://*.spotify.com/*",
+        "https://soundcloud.com/*",
+        "https://*.soundcloud.com/*"
       ],
-	"icons": {
-	  "16": "16.png",
-	  "32": "32.png",
-	  "48": "48.png",
-	  "64": "64.png",
-	  "128": "128.png"
-	}
+      "js": ["nowplaying_client.js"]
+    }
+  ],
+  
+  "options_page": "options.html",
+
+  "icons": {
+    "16": "16.png",
+    "32": "32.png",
+    "48": "48.png",
+    "64": "64.png",
+    "128": "128.png"
+  }
 }
