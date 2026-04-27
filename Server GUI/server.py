@@ -16,6 +16,25 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("NowPlayingWS")
 logger.setLevel(logging.INFO)
 
+class IgnoreInvalidHandshakeFilter(logging.Filter):
+    def filter(self, record):
+        msg = record.getMessage()
+
+        if "opening handshake failed" in msg:
+            return False
+
+        exc = record.exc_info[1] if record.exc_info else None
+        if exc and exc.__class__.__name__ == "InvalidMessage":
+            return False
+
+        return True
+
+for name in (
+    "websockets.server",
+    "websockets.asyncio.server",
+):
+    logging.getLogger(name).addFilter(IgnoreInvalidHandshakeFilter())
+
 _loop = None
 _exit_future = None
 
